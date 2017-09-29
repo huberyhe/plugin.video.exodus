@@ -1,3 +1,5 @@
+# NEEDS FIXING
+
 # -*- coding: utf-8 -*-
 
 '''
@@ -31,9 +33,9 @@ class source:
     def __init__(self):
         self.priority = 1
         self.language = ['en']
-        self.domains = ['dizigold.net', 'dizigold.org']
-        self.base_link = 'http://www.dizigold.org'
-        self.player_link = 'http://player.dizigold.org/?id=%s&s=1&dil=%s'
+        self.domains = ['dizigold.net', 'dizigold1.com']
+        self.base_link = 'http://www.dizigold1.com'
+        self.player_link = 'http://player.dizigold1.com/?id=%s&s=1&dil=%s'
 
 
     def tvshow(self, imdb, tvdb, tvshowtitle, localtvshowtitle, aliases, year):

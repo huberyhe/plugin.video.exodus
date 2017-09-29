@@ -30,7 +30,7 @@ class source:
     def __init__(self):
         self.priority = 1
         self.language = ['en']
-        self.domains = ['movieshd.tv', 'movieshd.is', 'movieshd.watch', 'flixanity.is', 'flixanity.me','istream.is', 'flixanity.online']
+        self.domains = ['movieshd.tv', 'movieshd.is', 'movieshd.watch', 'flixanity.is', 'flixanity.me','istream.is']
         self.base_link = 'https://flixanity.online'
 
     def movie(self, imdb, title, localtitle, aliases, year):

@@ -1,3 +1,5 @@
+# NEEDS FIXING
+
 # -*- coding: utf-8 -*-
 
 '''
@@ -31,8 +33,8 @@ class source:
     def __init__(self):
         self.priority = 1
         self.language = ['en']
-        self.domains = ['hdmovie14.net']
-        self.base_link = 'http://hdmovie14.net'
+        self.domains = ['movieocean.net']
+        self.base_link = 'https://movieocean.net'
         self.search_link = 'aHR0cHM6Ly93d3cuZ29vZ2xlYXBpcy5jb20vY3VzdG9tc2VhcmNoL3YxZWxlbWVudD9rZXk9QUl6YVN5Q1ZBWGlVelJZc01MMVB2NlJ3U0cxZ3VubU1pa1R6UXFZJnJzej1maWx0ZXJlZF9jc2UmbnVtPTEwJmhsPWVuJmN4PTAwNjkxOTYxOTI2MzYxNzgyMDM4ODpkYmljLTZweGt4cyZnb29nbGVob3N0PXd3dy5nb29nbGUuY29tJnE9JXM='
         self.moviesearch_link = '/watch/%s-%s'
         self.tvsearch_link = '/watch/%s-%s-season-%s/%s'

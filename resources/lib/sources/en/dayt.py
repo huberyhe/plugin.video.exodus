@@ -29,8 +29,8 @@ class source:
     def __init__(self):
         self.priority = 1
         self.language = ['en']
-        self.domains = ['dayt.se', 'cyro.se']
-        self.base_link = 'http://cyro.se'
+        self.domains = ['dayt.se', 'cyro.se', 'xpau.se']
+        self.base_link = 'http://xpau.se'
         self.watch_link = '/watch/%s'
         self.watch_series_link = '/watch/%s/s%s/e%s'
 

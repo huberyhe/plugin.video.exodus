@@ -1,4 +1,4 @@
-﻿<addon id="plugin.video.exodus" version="3.1.22" name="Exodus" provider-name="Exodus">
+﻿<addon id="plugin.video.exodus" version="3.1.25" name="Exodus" provider-name="Exodus">
 	<requires>
 		<import addon="xbmc.python" version="2.19.0" />
 		<import addon="script.exodus.artwork" version="1.0.5" />
@@ -16,6 +16,6 @@
 		<forum></forum>
 		<website></website>
 		<source></source>
-		<news>Last Version Made From The TVA Guys, If anything changes will be listed here, this version should fix install errors</news>
+		<news>This is the Last Version Made From [COLOR red][B]C0LD[/B][/COLOR][COLOR turquoise][B]FIRE[/B][/COLOR]. He'll not continue maintaining EXODUS anymore! Fixed missing sources, updated scrapers!</news>
 	</extension>
 </addon>

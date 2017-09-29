@@ -29,8 +29,8 @@ class source:
     def __init__(self):
         self.priority = 1
         self.language = ['en']
-        self.domains = ['watchhd.co', 'watchonline.one', 'watchonline.vip']
-        self.base_link = 'http://watchhd.co'
+        self.domains = ['watchhd.co', 'watchonline.one', 'watchonline.vip', 'hdmovieswatchs.net']
+        self.base_link = 'http://www.hdmovieswatchs.net'
 
 
     def movie(self, imdb, title, localtitle, aliases, year):

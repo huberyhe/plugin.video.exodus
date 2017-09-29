@@ -1,3 +1,5 @@
+# NEEDS FIXING
+
 # -*- coding: utf-8 -*-
 
 '''
@@ -30,8 +32,8 @@ class source:
     def __init__(self):
         self.priority = 1
         self.language = ['en']
-        self.domains = ['fmovie.co', 'afdah.org', 'xmovies8.org', 'putlockerhd.co']
-        self.base_link = 'https://afdah.org'
+        self.domains = ['afdah.to']
+        self.base_link = 'https://afdah.to'
         self.search_link = '/results?q=%s'
 
 

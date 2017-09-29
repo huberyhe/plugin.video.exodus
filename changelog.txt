@@ -1,3 +1,9 @@
+[B]3.1.24[/B]
+- Last update, fix missing sources, updated scrapers
+
+[B]3.1.23[/B]
+- Fix missing sources, updated scrapers
+
 [B]3.1.19[/B]
 - Fix Python < 2.7 bug in subtitles
 - Fix Python < 2.7 bug in sources.py

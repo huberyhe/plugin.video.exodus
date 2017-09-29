@@ -1,3 +1,5 @@
+# NEEDS FIXING
+
 '''
     Exodus Add-on
     Copyright (C) 2016 Exodus
@@ -32,8 +34,8 @@ class source:
         '''
         self.priority = 1
         self.language = ['en']
-        self.domains = ['fmovies.se', 'fmovies.to']
-        self.base_link = 'https://fmovies.se'
+        self.domains = ['fmovies.se', 'fmovies.to', 'fmovies.se']
+        self.base_link = 'https://fmovies.is'
         self.movie_search_path = ('/filter?keyword=%s&sort=post_date:Adesc'
                                   '&type[]=movie&release[]=%s')
         self.episode_search_path = ('/filter?keyword=%s&sort=post_date:Adesc'

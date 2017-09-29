@@ -30,8 +30,8 @@ class source:
     def __init__(self):
         self.priority = 1
         self.language = ['en']
-        self.domains = ['pubfilmno1.com', 'pubfilm.com', 'pidtv.com', 'pubfilm.ac']
-        self.base_link = 'http://pubfilm.ac'
+        self.domains = ['pubfilmno1.com', 'pubfilm.com', 'pidtv.com', 'pubfilm.ac', 'pubfilm.to']
+        self.base_link = 'http://www.pubfilm.to'
         self.moviesearch_link = '/%s-%s-full-hd-pubfilm-free.html'
         self.moviesearch_link_2 = '/%s-%s-pubfilm-free.html'
         self.tvsearch_link = '/wp-admin/admin-ajax.php'

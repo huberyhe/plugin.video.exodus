@@ -19,76 +19,37 @@
 '''
 
 
-import re,urllib,urlparse,json,base64,hashlib,time
+import re,urllib,urlparse,json,base64
 
 from resources.lib.modules import cleantitle
 from resources.lib.modules import client
+from resources.lib.modules import source_utils
+from resources.lib.modules import dom_parser
+#from resources.lib.modules import log_utils
+
 
 
 class source:
     def __init__(self):
         self.priority = 0
         self.language = ['en']
-        self.domains = ['watchseries.ag']
-        self.base_link = 'aHR0cDovL3dzLm1n'
-        self.hash_link = 'MzI4aiUlR3VTKiVzZkEyNDMxNDJmbyMyMyUl'
-        self.search_link = 'L2pzb24vc2VhcmNoLyVz'
-        self.agent_link = 'V1MgTW9iaWxl'
+        self.domains = ['watchseriesfree.to']
+        self.base_link = 'https://watchseriesfree.to'
+        self.search_link = 'https://watchseriesfree.to/search/%s'
 
-
-    def request(self, url):
-        try:
-            r = self.request_call(url)
-            if r == None: time.sleep(1) ; r = self.request_call(url)
-            if r == None: time.sleep(1) ; r = self.request_call(url)
-            return r
-        except:
-            return
-
-
-    def request_call(self, url):
-        try:
-            if not url.startswith('/'): url = '/' + url
-            if not url.startswith('/json'): url = '/json' + url
-
-            hash = hashlib.md5()
-            hash.update(base64.b64decode(self.hash_link) % url)
-
-            url = urlparse.urljoin(base64.b64decode(self.base_link), hash.hexdigest() + url)
-
-            result = client.request(url, headers={'User-Agent': base64.b64decode(self.agent_link)})
-            result = json.loads(result)['results'].values()
-            return result
-        except:
-            return
 
 
     def tvshow(self, imdb, tvdb, tvshowtitle, localtvshowtitle, aliases, year):
         try:
-            query = base64.b64decode(self.search_link) % urllib.quote_plus(cleantitle.query(tvshowtitle))
+            query = self.search_link % urllib.quote_plus(cleantitle.query(tvshowtitle))
+            result = client.request(query)
+            #tvshowtitle = cleantitle.get(tvshowtitle)
+            t = [tvshowtitle] + source_utils.aliases_to_array(aliases)
+            t = [cleantitle.get(i) for i in set(t) if i]
+            result = re.compile('itemprop="url"\s+href="([^"]+).*?itemprop="name"\s+class="serie-title">([^<]+)', re.DOTALL).findall(result)
+            for i in result:
+                if cleantitle.get(cleantitle.normalize(i[1])) in t and year in i[1]: url = i[0]
 
-            result = self.request(query)
-
-            tvshowtitle = cleantitle.get(tvshowtitle)
-            years = ['%s' % str(year), '%s' % str(int(year)+1), '%s' % str(int(year)-1)]
-
-            result = [i for i in result if any(x in str(i['year']) for x in years)]
-
-            match = [i['href'] for i in result if tvshowtitle == cleantitle.get(i['name'])]
-            match = [i['href'] for i in result if tvshowtitle == cleantitle.get(i['name']) and str(year) == str(i['year'])]
-
-            match2 = [i['href'] for i in result]
-            match2 = [x for y,x in enumerate(match2) if x not in match2[:y]]
-            if match2 == []: return
-
-            for i in match2[:5]:
-                try:
-                    if len(match) > 0: url = match[0] ; break
-                    if imdb in str(self.request(i)[0]['imdb']): url = i ; break
-                except:
-                    pass
-
-            url = '/' + url.split('/json/')[-1]
             url = url.encode('utf-8')
             return url
         except:
@@ -99,27 +60,16 @@ class source:
         try:
             if url == None: return
 
-            result = self.request(url)
-
-            result = result[0]['episodes'].values()
-
-            for i, v in enumerate(result):
-                try: result[i] = v.values()
-                except: pass
-
-            result = [i for i in result if type(i) == list]
-            result = sum(result, [])
-            result = [i for i in result if i['hasLinks'] == True]
+            url = urlparse.urljoin(self.base_link, url)
+            result = client.request(url)
 
             title = cleantitle.get(title)
             premiered = re.compile('(\d{4})-(\d{2})-(\d{2})').findall(premiered)[0]
             premiered = '%s/%s/%s' % (premiered[2], premiered[1], premiered[0])
+            items = dom_parser.parse_dom(result, 'a', attrs={'itemprop':'url'})
 
-            url = [i for i in result if title == cleantitle.get(i['name']) and premiered == i['release']][:1]
-            if len(url) == 0: url = [i for i in result if premiered == i['release']]
-            if len(url) == 0 or len(url) > 1: url = [i for i in result if '_s%01d_e%01d' % (int(season), int(episode)) in i['url']]
-
-            url = '/' + url[0]['url'].split('/json/')[-1]
+            url = [i.attrs['href'] for i in items if bool(re.compile('<span\s*>%s<.*?itemprop="episodeNumber">%s<\/span>' % (season,episode)).search(i.content))][0]
+            
             url = url.encode('utf-8')
             return url
         except:
@@ -131,25 +81,33 @@ class source:
             sources = []
 
             if url == None: return sources
-
-            result = self.request(url)
-
-            links = result[0]['links']
-            links = [i['url'] for i in links if i['lang'] == 'English']
-
-            for i in links:
+            url = urlparse.urljoin(self.base_link, url)
+            for i in range(3):
+                result = client.request(url, timeout=10)
+                if not result == None: break
+            
+            dom = dom_parser.parse_dom(result, 'div', attrs={'class':'links', 'id': 'noSubs'})
+            result = dom[0].content
+            
+            links = re.compile('<tr\s*>\s*<td><i\s+class="fa fa-youtube link-logo"></i>([^<]+).*?href="([^"]+)"\s+class="watch',re.DOTALL).findall(result)         
+            for link in links[:5]:
                 try:
-                    host = re.findall('([\w]+[.][\w]+)$', urlparse.urlparse(i.strip().lower()).netloc)[0]
-                    if not host in hostDict: raise Exception()
-                    host = client.replaceHTMLCodes(host)
-                    host = host.encode('utf-8')
-
-                    url = i.encode('utf-8')
-
-                    sources.append({'source': host, 'quality': 'SD', 'language': 'en', 'url': url, 'direct': False, 'debridonly': False})
+                    url2 = urlparse.urljoin(self.base_link, link[1])
+                    for i in range(2):
+                        result2 = client.request(url2, timeout=3)
+                        if not result2 == None: break                    
+                    r = re.compile('href="([^"]+)"\s+class="action-btn').findall(result2)[0]
+                    valid, hoster = source_utils.is_host_valid(r, hostDict)
+                    if not valid: continue
+                    #log_utils.log('JairoxDebug1: %s - %s' % (url2,r), log_utils.LOGDEBUG)
+                    urls, host, direct = source_utils.check_directstreams(r, hoster)
+                    for x in urls: sources.append({'source': host, 'quality': x['quality'], 'language': 'en', 'url': x['url'], 'direct': direct, 'debridonly': False})
+                    
                 except:
-                    pass
-
+                    #traceback.print_exc()
+                    pass           
+                    
+            #log_utils.log('JairoxDebug2: %s' % (str(sources)), log_utils.LOGDEBUG)
             return sources
         except:
             return sources

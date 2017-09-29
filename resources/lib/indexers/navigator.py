@@ -18,11 +18,23 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 '''
 
+import base64,hashlib,os,random,re,shutil,string,sys,urllib,urllib2,json,urlresolver,ssl,zipfile,urlparse, datetime
+import xbmc,xbmcgui
 
-import os,sys,urlparse
+try: from sqlite3 import dbapi2 as database
+except: from pysqlite2 import dbapi2 as database
 
+from resources.lib.modules import cache
+from resources.lib.modules import metacache
+from resources.lib.modules import client
 from resources.lib.modules import control
+from resources.lib.modules import regex
+from resources.lib.modules import trailer
+from resources.lib.modules import workers
+from resources.lib.modules import views
 from resources.lib.modules import trakt
+from resources.lib.modules import common
+from resources.lib.modules import notify
 
 
 sysaddon = sys.argv[0] ; syshandle = int(sys.argv[1]) ; control.moderator()
@@ -37,8 +49,30 @@ traktIndicators = trakt.getTraktIndicatorsInfo()
 
 queueMenu = control.lang(32065).encode('utf-8')
 
+TXTHeader = '[B]>>[COLOR lime]Disclaimer[/COLOR]<<[/B]'
+addon_id = 'plugin.video.exodus'
+ADDON_FOLDER = xbmc.translatePath(os.path.join('special://home/addons/' + addon_id))
+TERMS = xbmc.translatePath(os.path.join(ADDON_FOLDER , 'resources/disclaimer.txt'))
+DATA_FOLDER = xbmc.translatePath(os.path.join('special://home/userdata/addon_data/' + addon_id))
+I_AGREE = xbmc.translatePath(os.path.join(DATA_FOLDER , 'agreed.txt'))
+fanart         = xbmc.translatePath(os.path.join('special://home/addons/' + addon_id , 'fanart.jpg'))
+icon           = xbmc.translatePath(os.path.join('special://home/addons/' + addon_id, 'icon.png'))
+dialog = xbmcgui.Dialog()
+User_Agent = 'Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36'
 
 class navigator:
+
+    if not os.path.exists(DATA_FOLDER):
+        os.makedirs(DATA_FOLDER)
+    if not os.path.exists(I_AGREE): 
+        notify.AgreeFirst()
+        open(I_AGREE, 'w')
+    else:
+        pass
+
+    def __init__(self):
+        self.list = [] ; self.hash = []
+
     def root(self):
         self.addDirectoryItem(32001, 'movieNavigator', 'movies.png', 'DefaultMovies.png')
         self.addDirectoryItem(32002, 'tvNavigator', 'tvshows.png', 'DefaultTVShows.png')

@@ -30,8 +30,8 @@ class source:
     def __init__(self):
         self.priority = 0
         self.language = ['en']
-        self.domains = ['afdah.tv']
-        self.base_link = 'http://afdah.tv'
+        self.domains = ['afdah.to']
+        self.base_link = 'http://afdah.to'
         self.search_link = '/wp-content/themes/afdah/ajax-search.php'
         self.post_link = 'yreuq=%s&meti=title'
 

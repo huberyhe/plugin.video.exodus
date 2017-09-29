@@ -19,6 +19,7 @@
 '''
 
 
+
 import re,urllib,urlparse,json,base64,time
 
 from resources.lib.modules import cleantitle
@@ -77,15 +78,28 @@ class source:
     def searchShow(self, title, season, aliases, headers):
         try:
             title = cleantitle.normalize(title)
+            cltitle = cleantitle.get(title+'season'+season)
             search = '%s Season %01d' % (title, int(season))
             url = urlparse.urljoin(self.base_link, self.search_link % urllib.quote_plus(cleantitle.getsearch(search)))
-            r = client.request(url, headers=headers, timeout='15')
-            r = client.parseDOM(r, 'div', attrs={'class': 'item-detail'})
-            r = zip(client.parseDOM(r, 'a', ret='href'), client.parseDOM(r, 'a', ret='title'))
-            r = [(i[0], i[1], re.findall('(.*?)\s+-\s+Season\s+(\d)', i[1])) for i in r]
-            r = [(i[0], i[1], i[2][0]) for i in r if len(i[2]) > 0]
-            url = [i[0] for i in r if self.matchAlias(i[2][0], aliases) and i[2][1] == season][0]
-            url = '%s/watch' % url
+            r = client.request(url, timeout='15')
+            r = [i[0] for i in re.findall(r"<li\s+class='movie-item'\s+data-url='([^']+)'\s+data-title=\"([^\"]+)\">",r, re.IGNORECASE) if cleantitle.get(i[1]) == cltitle]
+            for u in r:
+                try:
+                    result = client.request(urlparse.urljoin(self.base_link, u), timeout=10)
+                    result = json.loads(result)['html']
+                    match = re.findall(r'Season\s+%s.*?class="jtip-bottom"><a\s+href="([^"]+)"' % season, result, re.DOTALL)[0]
+                    if not match == None: break
+                except:
+                    pass
+            if match == None: return
+            else: url = match
+
+            #r = client.parseDOM(r, 'div', attrs={'class': 'item-detail'})
+            #r = zip(client.parseDOM(r, 'a', ret='href'), client.parseDOM(r, 'a', ret='title'))
+            #r = [(i[0], i[1], re.findall('(.*?)\s+-\s+Season\s+(\d)', i[1])) for i in r]
+            #r = [(i[0], i[1], i[2][0]) for i in r if len(i[2]) > 0]
+            #url = [i[0] for i in r if self.matchAlias(i[2][0], aliases) and i[2][1] == season][0]
+            url = '%s/watching.html' % url
             return url
         except:
             return
@@ -93,21 +107,35 @@ class source:
     def searchMovie(self, title, year, aliases, headers):
         try:
             title = cleantitle.normalize(title)
+            cltitle = cleantitle.get(title)
             url = urlparse.urljoin(self.base_link, self.search_link % urllib.quote_plus(cleantitle.getsearch(title)))
-            r = client.request(url, headers=headers, timeout='15')
-            r = client.parseDOM(r, 'div', attrs={'class': 'item-detail'})
-            r = zip(client.parseDOM(r, 'a', ret='href'), client.parseDOM(r, 'a', ret='title'))
-            results = [(i[0], i[1], re.findall('\((\d{4})', i[1])) for i in r]
-            try:
-                r = [(i[0], i[1], i[2][0]) for i in results if len(i[2]) > 0]
-                url = [i[0] for i in r if self.matchAlias(i[1], aliases) and (year == i[2])][0]
-            except:
-                url = None
-                pass
+            r = client.request(url, timeout='15')
+            r = [i[0] for i in re.findall(r"<li\s+class='movie-item'\s+data-url='([^']+)'\s+data-title=\"([^\"]+)\">",r, re.IGNORECASE) if cleantitle.get(i[1]) == cltitle]
+            for u in r:
+                try:
+                    result = client.request(urlparse.urljoin(self.base_link, u), timeout=10)
+                    result = json.loads(result)['html']
+                    match = re.findall(r'Year<\/span><span\s+class="jb-bot">%s<\/span>.*?class="jtip-bottom"><a\s+href="([^"]+)"'%year, result, re.DOTALL)[0]
+                    if not match == None: break
+                except:
+                    pass
+            if match == None: return
+            else: url = match
 
-            if (url == None):
-                url = [i[0] for i in results if self.matchAlias(i[1], aliases)][0]
-            url = '%s/watch' % url
+            #r = [client.parseDOM(r, 'li', attrs={'class': 'movie-item'}, ret='data-url') for i in r if re.search(r'data-title="%s"'%title, i)]
+            #r = zip(client.parseDOM(r, 'a', ret='href'), client.parseDOM(r, 'a', ret='title'))
+            #results = [(i[0], i[1], re.findall('\((\d{4})', i[1])) for i in r]
+            #try:
+            #    r = [(i[0], i[1], i[2][0]) for i in results if len(i[2]) > 0]
+            #    url = [i[0] for i in r if self.matchAlias(i[1], aliases) and (year == i[2])][0]
+            #except:
+            #    url = None
+            #    pass
+
+            #if (url == None):
+            #    url = [i[0] for i in results if self.matchAlias(i[1], aliases)][0]
+
+            url = '%s/watching.html' % url
             return url
         except:
             return
@@ -159,9 +187,9 @@ class source:
                         src = 'http:'+src
                     episodeId = re.findall('.*streamdor.co/video/(\d+)', src)[0]
                     p = client.request(self.token_link % episodeId, referer=src)
-                    script = self.aadecode(p)
-                    token = re.search('''token\s*:\s*['"]([^"']+)''', script).group(1).encode('utf-8')
-                    post = {'type': 'sources', 'token': token, 'ref': ''}
+                    #script = self.aadecode(p)
+                    token = re.search('''token\s*:\s*['"]([^"']+)''', p).group(1).encode('utf-8')
+                    post = {'type': 'sources', 'token': token, 'ref': urllib.quote_plus(referer)}
                     p = client.request(self.source_link % episodeId, post=post, referer=src, XHR=True)
                     js = json.loads(p)
 
@@ -184,38 +212,3 @@ class source:
 
     def resolve(self, url):
         return directstream.googlepass(url)
-
-    def aadecode(self, text):
-        text = re.sub(r"\s+|/\*.*?\*/", "", text)
-        data = text.split("+(ﾟДﾟ)[ﾟoﾟ]")[1]
-        chars = data.split("+(ﾟДﾟ)[ﾟεﾟ]+")[1:]
-
-        txt = ""
-        for char in chars:
-            char = char \
-                .replace("(oﾟｰﾟo)", "u") \
-                .replace("c", "0") \
-                .replace("(ﾟДﾟ)['0']", "c") \
-                .replace("ﾟΘﾟ", "1") \
-                .replace("!+[]", "1") \
-                .replace("-~", "1+") \
-                .replace("o", "3") \
-                .replace("_", "3") \
-                .replace("ﾟｰﾟ", "4") \
-                .replace("(+", "(")
-            char = re.sub(r'\((\d)\)', r'\1', char)
-
-            c = ""
-            subchar = ""
-            for v in char:
-                c += v
-                try:
-                    x = c; subchar += str(eval(x)); c = ""
-                except:
-                    pass
-            if subchar != '': txt += subchar + "|"
-        txt = txt[:-1].replace('+', '')
-
-        txt_result = "".join([chr(int(n, 8)) for n in txt.split('|')])
-
-        return txt_result

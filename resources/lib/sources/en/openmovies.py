@@ -1,3 +1,5 @@
+# NEEDS FIXING
+
 # -*- coding: utf-8 -*-
 
 '''
@@ -29,8 +31,8 @@ class source:
     def __init__(self):
         self.priority = 1
         self.language = ['en']
-        self.domains = ['openloadmovies.net', 'openloadmovies.tv', 'openloadmovies.org', 'openloadmovies.co']
-        self.base_link = 'http://openloadmovies.org'
+        self.domains = ['openloadstream.net', 'openloadmovies.tv', 'openloadmovies.org', 'openloadmovies.co']
+        self.base_link = 'https://openloadstream.net'
         self.search_link = '/?s=%s'
 
     def movie(self, imdb, title, localtitle, aliases, year):
